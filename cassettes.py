@@ -35,64 +35,64 @@ tapes = [
  '|__||           ||__|',
  '|__||___________||__|']]]
 
-def print_menu():
-    print(30 * '-' , 'MENU' , 30 * '-')
-    print('1. Cassettes')
-    print('2. VHS')
-    print('3. Floppy Disk')
-    print('4. SNES')
-    print(67 * '-')
 
-def get_tape_type():
-    try:
+def print_menu2(title, choices, prompt='Choose an option'):
+    """ Prints a menu
+        
+    Args:
+        title (str): Title to menu
+        choices (list): Strings of all the available choices
+        prompt (str): Prompt for to help user with menu
+    """
+    buffer = int((70 - len(title))/2) # Buffer for styling menu
+    print(buffer * '-' , title , buffer * '-')
+    option_count = 1
+    for option in choices:
+        print(str(option_count) + ". " + option)
+        option_count+=1
+    print(71 * '-')
+    print(prompt)
+    try: # Attempt to get input from user
         dummy = False
-        tape_choice = int(input())
-        while not 0 < tape_choice < 5:
-            print('Please enter a valid choice')
-            if dummy:
-                if tape_choice == 0:
-                    print_menu()
+        menu_choice = int(input())
+        while not 0 < menu_choice < option_count: # Make sure user inputs value associated with a choice
+            print('Please choose a value associated with a choice.')
+            if dummy: # User needs help with input
+                if menu_choice == 0:
+                    print_menu2(title, choices, prompt)
                 else:
-                    print('Available options are: [1, 2, 3, 4]')
+                    print('Available choices are in range (0, ' + str(option_count) + ')')
                     print('To see the menu again, enter \'0\'')
             dummy = True
-            tape_choice = int(input())
-    except (ValueError, TypeError):
+            menu_choice = int(input())
+    except (ValueError, TypeError): # Error thrown
         print('Error with input')
     else:
-         return tapes[tape_choice - 1]
+         return menu_choice # Return the int associated to menu choice
 
-def get_tape_count():
-    try:
-        tape_count = int(input('How many tapes wide should the shape be?\n'))
-        if 0 < tape_count < 8:
-            return tape_count
-    except (ValueError, TypeError):
-        print('Error with input')
-    except:
-        print('Please enter a valid number')
-        print('Available input is in range (1-7)')
-        get_tape_count()
+    
+def get_info():
+    choices = ['Cassettes', 'VHS', 'Floppy', 'SNES']
+    # Convert menu choice index to tapes index
+    tape_type = print_menu2('Tape Type', choices, 'Choose a type of tape to be printed.') - 1
 
-def get_tape_shape():
-    try:
-        dummy = False
-        tape_shape = int(input('What shape would you like the tapes printed in?\n1. Square\n2. Triangle\n'))
-        while (tape_shape != 1 and tape_shape != 2):
-            print('Please enter a valid choice')
-            if dummy:
-                print('Available options are: 1 or 2')
-            dummy = True
-            tape_count = int(input())
-    except (ValueError, TypeError):
-        print('Error with input')
-    else:
-        return tape_shape
+    choices = ['Square', 'Triangle']
+    tape_shape = choices[print_menu2('Shape', choices, 'Choose a shape for the ' + tapes[tape_type][0])-1]
 
-def get_shape_direction():
-    return 1
+    # User chose Triangle
+    if tape_shape == 'Triangle':
+        choices = ['Top Left', 'Top Right', 'Bottom Left', 'Bottom Right']
+        direction = print_menu2('Triangle Position', choices, 'Choose a direction the Triangle faces.')
+    else: 
+        direction = 0 # Default the direction
+    
+    choices = ['1', '2', '3', '4', '5', '6', '7']
+    tape_count = print_menu2('Side length', choices, 'Choose the side length of the ' + tape_shape)
+    
+    return tape_type, tape_shape, tape_count, direction
+    
 
-def print_tapes(tape_type, tape_length, tape_shape):
+def print_tapes(tape_type, tape_shape, tape_length, direction):
     """Prints out the tapes with given args
 
     Args:
@@ -101,26 +101,45 @@ def print_tapes(tape_type, tape_length, tape_shape):
         tape_shape (int): 1 = Square, 2 = Triangle
     """
     # Print square shape
-    if tape_shape == 1:
+    if tape_shape == 'Square' or direction == 0:
         for i in range(0, tape_length):
-            for line_chunk in tape_type[1]:
+            for line_chunk in tapes[tape_type][1]:
                 for j in range(0, tape_length):
                     print(" " + line_chunk + " ", end="")
                 print('\r')
-    else: # Print triangle in top left
-        col_count = tape_length
-        for row_count in range(0, tape_length):
-            for line_chunk in tape_type[1]:
-                print((" " + line_chunk + " ") * col_count)
-            col_count-=1
+    else: 
+        if direction == 1:
+            # Print triangle in top left
+            col_count = tape_length
+            for row_count in range(0, tape_length):
+                for line_chunk in tapes[tape_type][1]:
+                    print((" " + line_chunk + " ") * col_count)
+                col_count-=1
+        elif direction == 2:
+            # Print triangle in top right
+            for row_count in range(0, tape_length):
+                for line_chunk in tapes[tape_type][1]:
+                    print(' '*(len(line_chunk)+2)*row_count, end='')
+                    print((' ' + line_chunk + ' ') * (tape_length - row_count))
+        elif direction == 3:
+            # Print triangle in bottom left
+            for row_count in range(0, tape_length):
+                for line_chunk in tapes[tape_type][1]:
+                    print((' ' + line_chunk + ' ') * (row_count + 1))
+        elif direction == 4:
+            # Print triangle in bottom right
+            for row_count in range(0, tape_length):
+                for line_chunk in tapes[tape_type][1]:
+                    print(' '*(len(line_chunk)+2)*(tape_length-row_count-1), end='')
+                    print((" " + line_chunk + " ") * (row_count + 1))
+        else:
+            print('Problem with triangle direction.')
+        
     
 
 while True:
-    print_menu()
-    tape_type = get_tape_type()
-    tape_count = get_tape_count()
-    tape_shape = get_tape_shape()
-    print_tapes(tape_type, tape_count, tape_shape)
+    tape_type, tape_shape, tape_count, direction = get_info()
+    print_tapes(tape_type, tape_shape, tape_count, direction)
 
     print('Want more tapes?\n 1. Yes\n 2. No')
     if int(input()) == 2:
