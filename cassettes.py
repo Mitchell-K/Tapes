@@ -77,7 +77,8 @@ def get_tape_count():
     else:
         return tape_count
 
-def print_tapes(side_length):
+def print_tapes(tape_type, tape_count):
+    side_length = int(tape_count**0.5)
     for i in range(0, side_length):
         for line_chunk in tape_type[1]:
             for j in range(0, side_length):
@@ -89,7 +90,7 @@ while True:
     print_menu()
     tape_type = get_tape_type()
     tape_count = get_tape_count()
-    print_tapes(int(tape_count**0.5))
+    print_tapes(tape_type, tape_count)
 
     print("Want more tapes?\n 1. Yes\n 2. No")
     if int(input()) == 2:
